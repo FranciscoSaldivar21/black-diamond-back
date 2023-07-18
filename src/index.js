@@ -5,7 +5,7 @@ import cors from "cors";
 import usersRoutes from "./routes/users.routes.js";
 import indexRoutes from "./routes/index.routes.js";
 
-import { SERVER_PORT } from './config.js';
+import { SERVER_PORT } from './database/config.js';
 
 const app = express();
 
