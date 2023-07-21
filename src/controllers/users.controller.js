@@ -13,7 +13,7 @@ export const getUsers = async (req, res) => {
 };
 
 export const createUser = async (req, res) => {
-  const { name, phone, email, password } = req.body;
+  const { name, phone, email, password, adress } = req.body;
   let date = new Date().toLocaleDateString();
 
   //Encriptar contraseña
@@ -22,14 +22,15 @@ export const createUser = async (req, res) => {
 
   try {
     const [rows] = await pool.query(
-      "INSERT INTO user (user_name, user_email, password, register_date, user_status, user_phone) VALUES(?, ?, ?, ?, ?, ?)",
-      [name, email, hashPassword, date, "1", phone]
+      "INSERT INTO user (user_name, user_email, password, register_date, user_status, user_phone, adress) VALUES(?, ?, ?, ?, ?, ?, ?)",
+      [name, email, hashPassword, date, "1", phone, adress]
     );
     return res.status(201).send({
       id: rows.insertId,
       phone: phone,
       name: name,
       email: email,
+      adress: adress,
       token: "ugeqdhyuiefggr38732378gbidf",
     });
     //Colocar código para generar JWT
