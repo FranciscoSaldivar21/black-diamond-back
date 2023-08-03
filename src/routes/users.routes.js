@@ -7,13 +7,16 @@ import {
   getUserById,
   updateUser,
   logIn,
+  forgotMyPassword
 } from "../controllers/users.controller.js";
 import { validateFields } from "../validators/validateFields.js";
+import { validateJWT } from "../middlewares/validateJWT.js";
 
 const router = Router();
 
-router.get("/", getUsers);
-router.get("/:id", getUserById);
+router.get("/forgotPassword/:email", forgotMyPassword);
+router.get("/", validateJWT, getUsers);
+router.get("/:id", validateJWT, getUserById);
 
 router.post("/register", 
 //Middlewares
@@ -32,5 +35,6 @@ router.delete("/:id", deleteUser);
 
 //Utilizando put se actualiza todo, patch solo una parte del registro
 router.patch("/:id", updateUser);
+
 
 export default router;

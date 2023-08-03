@@ -1,11 +1,17 @@
 import { Router } from "express";
 import { check } from "express-validator";
-import { getGiveawayById, getGiveaways } from "../controllers/giveaways.controller.js";
+import { createGiveaway, getGiveawayById, getGiveawayImages, getGiveaways, getTicketsByGiveawayId, updateGiveaway } from "../controllers/giveaways.controller.js";
+import { validateJWT } from "../middlewares/validateJWT.js";
 
 const router = Router();
 
-router.get("/:status", getGiveaways);
+router.post("/", validateJWT, createGiveaway);
+
+router.get("/all/:status", getGiveaways);
+router.get("/images/:id", getGiveawayImages)
 router.get("/:id", getGiveawayById);
+router.get("/tickets/:giveawayId", getTicketsByGiveawayId)
+router.put("/:id", validateJWT, updateGiveaway);
 
 
 export default router;
