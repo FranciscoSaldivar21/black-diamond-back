@@ -1,8 +1,15 @@
-# Dependency directories
-node_modules/
+lib-cov
+*.seed
+*.log
+*.csv
+*.dat
+*.out
+*.pid
+*.gz
 
-# Optional npm cache directory
-.npm
+pids
+logs
+results
+build
 
-# dotenv environment variables file
-.env
+node_modules
