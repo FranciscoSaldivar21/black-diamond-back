@@ -6,7 +6,6 @@ export const createJWT = (uid) => {
     return new Promise ((resolve, reject) => {
 
         jwt.sign({ id: uid }, JWT_SECRET, {
-          expiresIn: "24h",
         }, (err, token) => {
             if(err){
                 console.log(err);

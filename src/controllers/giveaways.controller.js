@@ -2,7 +2,7 @@ import path from "path";
 import { pool } from "../database/db.js";
 import fs from "fs";
 import { fileURLToPath } from "url";
-import { response } from "express";
+import { request, response } from "express";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -45,12 +45,15 @@ export const createGiveaway = async (req, res) => {
 
 
 export const getTicketsByGiveawayId = async (req, res = response) => {
-  const { giveawayId } = req.params;
+  const { giveawayId, offset } = req.params;
+  const start = parseInt(offset) * 500 + 1;
+  const limit = (parseInt(offset) + 1) * 500;
 
   try {
-      const [result] = await pool.query("SELECT * FROM ticket WHERE giveaway_id = ?", [giveawayId]);
+      const [result] = await pool.query("SELECT * FROM ticket WHERE giveaway_id = ? AND ticket_number >= ? AND ticket_number <= ? ORDER BY ticket_number ASC LIMIT 500", [giveawayId, start, limit]);
       return res.send(result);
   } catch (error) {
+      console.log(error);
       return res.status(400).json({
       error: "No se encontró la petición"
     })
@@ -90,7 +93,7 @@ export const getGiveawayById = async (req, res) => {
 
 export const getGiveawayImages = async (req, res) => {
   try {
-    const [result] = await pool.query("SELECT image_name FROM giveaway_images WHERE giveaway_id = ?", [
+    const [result] = await pool.query("SELECT image_name FROM giveaway_images WHERE giveaway_id = ? ORDER BY id", [
       req.params.id,
     ]);
 
@@ -147,3 +150,20 @@ export const updateGiveaway = async (req, res) => {
     }
   }
 };
+
+
+export const getTicketByNumber = async (req = request, res = response) => {
+  const { giveawayId, ticketNumber } = req.params;
+
+  try {
+    const [rows] = await pool.query("SELECT ticket_number FROM ticket WHERE ticket_number = ? AND giveaway_id = ?", [ticketNumber, giveawayId]);
+    console.log(rows);
+
+    if(rows.length > 0)
+      return res.status(200).send({ found : true });
+
+    return res.status(200).send({ found : false });
+  } catch (error) {
+    console.log(error);
+  }
+}
