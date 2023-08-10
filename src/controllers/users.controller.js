@@ -61,6 +61,8 @@ export const logIn = async (req, res) => {
       name: fromDB[0].user_name,
       phone: fromDB[0].user_phone,
       email: fromDB[0].user_email,
+      adress: fromDB[0].adress,
+      phone: fromDB[0].user_phone,
       token, 
     });
   } else {
@@ -100,21 +102,24 @@ export const deleteUser = async (req, res) => {
 
 export const updateUser = async (req, res) => {
   const { id } = req.params;
-  const { name, email, phone } = req.body;
+  const { name, email, phone, adress } = req.body;
+  console.log(name, email, phone, adress);
 
-  const [response] = await pool.query(
-    //Si no se recibe un dato coloca el que está por defecto
-    "UPDATE user SET user_email = ?, user_name = ?, user_phone = ?  WHERE user_id = ?",
-    [email, name, phone, id]
-  );
-  const { affectedRows } = response;
-
-  if (affectedRows <= 0)
+  try {
+    const [response] = await pool.query(
+      //Si no se recibe un dato coloca el que está por defecto
+      "UPDATE user SET user_email = ?, user_name = ?, user_phone = ?, adress = ? WHERE user_id = ?",
+      [email, name, phone, adress, id]
+    );
+    const { affectedRows } = response;
+    res.sendStatus(204);
+  } catch (error) {
+    console.log(error);
     return res.status(404).json({
       message: "Something was wrong",
     });
+  }
 
-  res.sendStatus(204); //It was ok  but I dont send anything
 };
 
 
@@ -141,12 +146,16 @@ export const forgotMyPassword = async (req, res) => {
 
     const message = {
       from: "paco200032@gmail.com",
-      to: "francisco.saldivar4081@alumnos.udg.mx",
-      subject: "Prueba",
-      html: `<p>Se ha solicitado una recuperación de contraseña para la pagina de Black Diamond Sorteos</p><br/>
-      <p style={{margin-top: 20px}}>La contraseña para el correo: ${email} es: ${fromDB[0].password}</p><br/>
-      <p style={{margin-top: 20px}}>Si desconoces esta solicitud ponte en contacto al correo paco200032@gmail.com</p><br/>
-      <p style={{margin-top: 40px}}>BLACK DIAMOND SORTEOS</p><br/>`,
+      to: email,
+      subject: "BLACK DIAMOND SORTEOS",
+      html:`<div>
+        <h3 style="font-weight: bold">BLACK DIAMOND SORTEOS</h3>
+        <p>Se ha solicitado la contraseña asociada a este correo para la pagina de blackdiamonsorteos.com</p>
+        <p>Esta es tu constraseña:  <span style="font-weight: 700">${fromDB[0].password}</span></p>
+        <div style="margin-top: 40">
+            <i>Si no solicitaste tu contraseña puedes ignorar el mensaje o ponerte en contacto a este mismo correo.</i>
+        </div>
+        </div>`
     };
 
     const transport = nodemailer.createTransport(config);

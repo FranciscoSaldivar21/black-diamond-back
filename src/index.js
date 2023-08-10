@@ -12,7 +12,10 @@ import usersRoutes from "./routes/users.routes.js";
 import indexRoutes from "./routes/index.routes.js";
 import giveaways from "./routes/giveaways.routes.js";
 import admin from "./routes/admin.routes.js";
+import payment from "./routes/payment.routes.js";
+import contact from "./routes/contact.routes.js";
 import { SERVER_PORT } from './database/config.js';
+import bodyParser from "body-parser";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -27,6 +30,17 @@ const storage = multer.diskStorage({
 
 const app = express();
 
+app.use(
+  bodyParser.json({
+    // Because Stripe needs the raw body, we compute it but only when hitting the Stripe callback URL.
+    verify: function (req, res, buf) {
+      var url = req.originalUrl;
+      if (url.startsWith("/webhook")) {
+        req.rawBody = buf.toString();
+      }
+    },
+  })
+);
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
@@ -51,7 +65,9 @@ app.use('/api', indexRoutes);
 app.use('/api/users', usersRoutes);
 app.use("/api/giveaway", giveaways);
 app.use("/api/admin", admin);
-app.use("/api/sales", sales)
+app.use("/api/sales", sales);
+app.use("/api/webhook", payment);
+app.use("/api/contact", contact)
 
 
 
