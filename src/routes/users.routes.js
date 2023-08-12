@@ -6,7 +6,7 @@ import {
   getUsers,
   getUserById,
   updateUser,
-  logIn,
+  logIn, 
   forgotMyPassword
 } from "../controllers/users.controller.js";
 import { validateFields } from "../validators/validateFields.js";
@@ -29,7 +29,7 @@ router.post("/register",
 createUser);
 
 router.post("/auth", logIn);
-router.put("/:id", updateUser);
+router.put("/:id", validateJWT,updateUser);
 
 router.delete("/:id", deleteUser);
 

@@ -139,23 +139,23 @@ export const forgotMyPassword = async (req, res) => {
       host: "smtp.gmail.com",
       port: 587,
       auth: {
-        user: "paco200032@gmail.com",
-        pass: "fgkzarznfcitlirl",
+        user: process.env.ENTERPRISE_EMAIL,
+        pass: process.env.EMAIL_PASSWORD,
       },
     };
 
     const message = {
-      from: "paco200032@gmail.com",
+      from: process.env.ENTERPRISE_EMAIL,
       to: email,
       subject: "BLACK DIAMOND SORTEOS",
-      html:`<div>
+      html: `<div>
         <h3 style="font-weight: bold">BLACK DIAMOND SORTEOS</h3>
         <p>Se ha solicitado la contraseña asociada a este correo para la pagina de blackdiamonsorteos.com</p>
         <p>Esta es tu constraseña:  <span style="font-weight: 700">${fromDB[0].password}</span></p>
         <div style="margin-top: 40">
             <i>Si no solicitaste tu contraseña puedes ignorar el mensaje o ponerte en contacto a este mismo correo.</i>
         </div>
-        </div>`
+        </div>`,
     };
 
     const transport = nodemailer.createTransport(config);

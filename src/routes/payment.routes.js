@@ -15,32 +15,29 @@ router.post(
   async (request, response) => {
     const event = request.body;
     const { type, data } = event;
+    const { giveawayId, userId, ticketPrice, saleId: idVenta, email } = data.object.metadata;
 
     switch (type) {
       case "payment_intent.succeeded":
         console.log(`El intento de pago fue exitoso ${type}`);
-        console.log(data.object);
         break;
       case "payment_intent.canceled":
         console.log(`Pago cancelado por el usuario ${type}`);
-        console.log(data.object);
         break;
       case "payment_intent.payment_failed":
         console.log(`El pago falló ${type}`);
-        console.log(data.object);
         break;
       case "checkout.session.expired":
         //Eliminar datos aquí y en el cancel
         console.log(`La sesión del pago expiró ${type}`);
-        console.log(data.object.metadata);
 
+        console.log(data);
         const { saleId } = data.object.metadata;
         try {
           const result = await pool.query(
             "DELETE FROM ticket WHERE sale_id = ?",
             [saleId]
           );
-          console.log(result);
 
           const res = await pool.query("DELETE FROM sales WHERE id = ?", [
             saleId,
@@ -52,65 +49,70 @@ router.post(
         break;
       case "checkout.session.completed":
         console.log(`El pago se completó ${type}`);
-        console.log(data);
         //Actualizar datos en tabla sales
-        const [res] = await pool.query("UPDATE sales set status = 1, idStripe = ?", [data.object.id]);
+        const [res] = await pool.query(
+          "UPDATE sales set status = 1, idStripe = ?",
+          [data.object.id]
+        );
 
         //Extraer tickets de regalo
         let limit = 0;
-        const tickets = data.object.metadata.tickets.split(",").length;
-        if (tickets <= 2)
-            limit = 5;
-        if (tickets > 2 && tickets < 5)
-            limit = 15;
-        if (tickets >= 5 && tickets < 8)
-            limit = 25;
-        if (tickets >= 8 && tickets < 10)
-            limit = 40;
-        if (tickets >= 10)
-            limit = 50;
-
         let giftTickets = [];
-        while(giftTickets.length < limit){
+        const tickets = data.object.metadata.tickets.split(",").length;
+        if (tickets > 1){
+          if (tickets > 2 && tickets < 5) limit = 7;
+          if (tickets >= 5 && tickets < 8) limit = 15;
+          if (tickets >= 8 && tickets < 10) limit = 22;
+          if (tickets >= 10) limit = 30;
+
+          while (giftTickets.length < limit) {
             const number = Math.floor(Math.random() * (99999 - 33333)) + 33333;
-            const [rows] = await pool.query("SELECT ticket_number FROM ticket WHERE ticket_number = ?", [number]); 
-            if(rows.length > 0)
-                continue;
-
-            giftTickets.push(number);
-        }
-
-        const { giveawayId, userId, ticketPrice, saleId : idVenta } = data.object.metadata;
-        for (let i = 0; i < giftTickets.length; i++) {
-            const giftTicketsInsertion = await pool.query(
-            "INSERT INTO ticket VALUES (0, ?, ?, ?, ?, ?, 2)",
-            [giveawayId, giftTickets[i], userId, ticketPrice, idVenta] //1 comprado, 2 regalado.
+            const [rows] = await pool.query(
+              "SELECT ticket_number FROM ticket WHERE ticket_number = ?",
+              [number]
             );
+            if (rows.length > 0) continue;
+  
+            giftTickets.push(number);
+          }
+
+          for (let i = 0; i < giftTickets.length; i++) {
+            const giftTicketsInsertion = await pool.query(
+              "INSERT INTO ticket VALUES (0, ?, ?, ?, ?, ?, 2)",
+              [giveawayId, giftTickets[i], userId, ticketPrice, idVenta] //1 comprado, 2 regalado.
+            );
+          }
         }
 
-        console.log("Tickets de regalo: " + giftTickets.length);
-        let typeBenefic;
-        if(data.object.metadata.giveawayBenefic === '1')
-            typeBenefic = "TIENES BENEFICIO BLACK DIAMOND GOLD POR COMPRAR EN LA PRIMERA SEMANA";
-        else if(data.object.metadata.giveawayBenefic === '2')
-            typeBenefic = "TIENES BENEFICIO BLACK DIAMOND SILVER POR COMPRAR EN LA SEGUNDA SEMANA";
-        else if(data.object.metadata.giveawayBenefic === '3')
-            typeBenefic = "TIENES BENEFICIO BLACK DIAMOND BRONZE POR COMPRAR EN LA TERCERA SEMANA";
 
+        let typeBenefic;
+        if (data.object.metadata.giveawayBenefic === "1")
+          typeBenefic =
+            "TIENES BENEFICIO BLACK DIAMOND GOLD POR COMPRAR EN LA PRIMERA SEMANA";
+        else if (data.object.metadata.giveawayBenefic === "2")
+          typeBenefic =
+            "TIENES BENEFICIO BLACK DIAMOND SILVER POR COMPRAR EN LA SEGUNDA SEMANA";
+        else if (data.object.metadata.giveawayBenefic === "3")
+          typeBenefic =
+            "TIENES BENEFICIO BLACK DIAMOND BRONZE POR COMPRAR EN LA TERCERA SEMANA";
+
+        let plusBenefic = "";
+        if(data.object.metadata.tickets.split(",").length >= 10)
+          plusBenefic = "TAMBIÉN TIENES BENEFICIO SUPER TRIPLE BLACK DIAMOND POR COMPRAR 10 BOLETOS O MÁS";
         //Send email
         const config = {
-        host: "smtp.gmail.com",
-        port: 587,
-        auth: {
-            user: process.env.ENTERPRISE_EMAIL,
-            pass: process.env.EMAIL_PASSWORD,
-        },
+          host: "smtp.gmail.com",
+          port: 587,
+          auth: {
+            user: "blackdiamondsorteos@gmail.com",
+            pass: "kycjnlqvzifzmgey",
+          },
         };
 
         const message = {
-          from: process.env.ENTERPRISE_EMAIL,
-          to: "francisco.saldivar4081@alumnos.udg.mx",
-          subject: "Prueba",
+          from: "blackdiamondsorteos@gmail.com",
+          to: email,
+          subject: "Tu compra en BLACK DIAMOND SORTEOS",
           html: `<!DOCTYPE html>
           <html lang="en">
               <head>
@@ -145,10 +147,11 @@ router.post(
                       </div>
                       <div class="h-40">
                           <p class="mt-4 font-body text-lg uppercase font-semibold">${typeBenefic}</p>
+                          <p class="mt-4 font-body text-lg uppercase font-semibold">${plusBenefic}</p>
                           <p class="mt-4 font-body text-lg">Boletos comprados:</p>
-                          <p class="mt-2 font-body text-lg">${data.object.metadata.tickets.split(",").map((e) => e + " ")}</p>
+                          <p class="mt-2 font-body text-lg"><strong>${data.object.metadata.tickets.split(",").map((e) => e + " ")}</strong></p>
                           <p class="mt-4 font-body text-lg">Boletos de regalo:</p>
-                          <p class="mt-2 font-body text-lg">${giftTickets.map((e) => e + " ")}</p>
+                          <p class="mt-2 font-body text-lg"><strong>${giftTickets.map((e) => e + " ")}</strong></p>
                       </div>
                       <div class="mt-10">
                           <p class="font-body text-lg">Te recomendamos conservar este correo para futuras aclaraciones.</p>
@@ -156,7 +159,7 @@ router.post(
                           <div class="flex flex-row justify-center align-middle items-center mt-10">
                               <div>
                                   <p class="font-body text-center text-lg">Si tienes alguna duda puedes comunicarte al correo: </p>
-                                  <p class="font-body text-center font-bold italic text-lg">blackdiamondsortes@gmail.com</p>
+                                  <p class="font-body text-center font-bold italic text-lg">blackdiamondsorteos@gmail.com</p>
                               </div>
                           </div>
                       </div>
@@ -187,13 +190,13 @@ router.get(
     const { giveawayId, saleId } = request.params;
 
     try {
-        const result = await pool.query("DELETE FROM ticket WHERE sale_id = ?", [saleId]);
-        console.log(result);
-    
-        const res = await pool.query("DELETE FROM sales WHERE id = ?", [saleId]);
-        console.log(res);
+      const result = await pool.query("DELETE FROM ticket WHERE sale_id = ?", [
+        saleId,
+      ]);
+
+      const res = await pool.query("DELETE FROM sales WHERE id = ?", [saleId]);
     } catch (error) {
-        console.log(error);
+      console.log(error);
     }
 
     return response.redirect(`http://localhost:5173/giveaway/${giveawayId}`);

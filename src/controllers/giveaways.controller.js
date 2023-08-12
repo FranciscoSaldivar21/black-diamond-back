@@ -43,7 +43,6 @@ export const createGiveaway = async (req, res) => {
   }
 }
 
-
 export const getTicketsByGiveawayId = async (req, res = response) => {
   const { giveawayId, offset } = req.params;
   const start = parseInt(offset) * 500 + 1;
@@ -59,11 +58,6 @@ export const getTicketsByGiveawayId = async (req, res = response) => {
     })
   }
 }
-
-
-
-
-
 
 export const getGiveaways = async (req, res) => {
   try {
@@ -166,4 +160,4 @@ export const getTicketByNumber = async (req = request, res = response) => {
   } catch (error) {
     console.log(error);
   }
-}
+} 

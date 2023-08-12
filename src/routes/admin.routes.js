@@ -9,4 +9,4 @@ router.post("/auth", logIn);
 //Validar y refrescar JWT
 router.get("/renew", validateJWT, refreshToken);
 
-export default router
+export default router;

@@ -4,9 +4,9 @@ import { validateJWT } from "../middlewares/validateJWT.js";
 
 const router = Router();
 
-router.post("/create-checkout-session/:giveawayId/:userId", insertSale);
+router.post("/create-checkout-session/:giveawayId/:userId",validateJWT, insertSale);
 router.get("/getSaleById/:id", validateJWT, getSaleById);
 router.get("/:userId", validateJWT, getSales);
 
 
-export default router; 
+export default router;  

@@ -52,6 +52,7 @@ export const insertSale = async (req = request, res = response) => {
     });
 
     const aux_date = new Date().getTime();
+    //Expira en 30 minutos
     const expireDate = new Date(aux_date + 1800000).getTime() / 1000;
     const session = await stripe.checkout.sessions.create({
       //30 minutos
@@ -63,10 +64,11 @@ export const insertSale = async (req = request, res = response) => {
         giveawayBenefic: giveawayBenefic,
         ticketPrice: ticketPrice,
         tickets: tickets.toString(),
+        email: userEmail,
       },
       line_items: [
         {
-          price: "price_1NcEZqBten3NBtUposUQ1EHW",
+          price: "price_1Ne4aeBten3NBtUpeTs1UnnQ",
           quantity: tickets.length,
         },
       ],
@@ -121,7 +123,7 @@ export const getSales = async (req = request, res = response) => {
 
   try {
     const [rows] = await pool.query(
-      "SELECT sales.id, sales.id_user, sales.sale_date, sales.giveaway_id, giveaway.car, giveaway.description, giveaway.giveaway_date, giveaway.status FROM sales INNER JOIN giveaway ON giveaway_id = giveaway.id WHERE sales.id_user = ? ORDER BY sales.id DESC",
+      "SELECT sales.id, sales.id_user, sales.sale_date, sales.giveaway_id, giveaway.car, giveaway.description, giveaway.giveaway_date, giveaway.status FROM sales INNER JOIN giveaway ON giveaway_id = giveaway.id WHERE sales.id_user = ? AND sales.status != 0 ORDER BY sales.id DESC",
       [userId]
     );
 

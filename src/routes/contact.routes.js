@@ -12,23 +12,23 @@ router.post("/", async (req = request, res = response) => {
       host: "smtp.gmail.com",
       port: 587,
       auth: {
-        user: "paco200032@gmail.com",
-        pass: "fgkzarznfcitlirl",
+        user: "blackdiamondsorteos@gmail.com",
+        pass: "kycjnlqvzifzmgey",
       },
     };
 
     const mail = {
       from: email,
-      to: "paco200032@gmail.com",
+      to: "blackdiamondsorteos@gmail.com",
       subject: subject,
-      html:`<div>
+      html: `<div>
         <h3 style="font-weight: bold">BLACK DIAMOND SORTEOS</h3>
         <p>Se ha recibido un correo de ${email}</p>
         <p>Esta es el mensaje: </p>
         <div style="margin-top: 40">
             <p>${message}</p>
         </div>
-        </div>`
+        </div>`,
     };
 
     try {
