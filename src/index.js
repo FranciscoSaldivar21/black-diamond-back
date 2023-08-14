@@ -20,6 +20,7 @@ import bodyParser from "body-parser";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const PORT = SERVER_PORT || 3000;
 
 const storage = multer.diskStorage({
     destination: path.join(__dirname, 'public/uploads'),
@@ -79,5 +80,5 @@ app.use("/api/contact", contact)
 //     })
 // })
 
-app.listen(SERVER_PORT);
+app.listen(PORT, "0.0.0.0");
 console.log(`App running on port ${SERVER_PORT}`)
