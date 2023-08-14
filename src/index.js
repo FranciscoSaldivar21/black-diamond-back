@@ -42,6 +42,7 @@ app.use(
     },
   })
 );
+
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({extended: false}));
@@ -81,4 +82,4 @@ app.use("/api/contact", contact)
 // })
 
 app.listen(PORT, "0.0.0.0");
-console.log(`App running on port ${PORT}`)
+console.log(`App running on port ${PORT}`);
