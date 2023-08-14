@@ -39,6 +39,7 @@ export const createUser = async (req, res) => {
     //Colocar código para generar JWT
   } catch (error) {
     if (error) {
+      console.log(error);
       return res.status(500).json({
         error: "El email ya existe",
       });
