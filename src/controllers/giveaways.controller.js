@@ -15,8 +15,8 @@ export const createGiveaway = async (req, res) => {
 
   try {
     const [rows] = await pool.query(
-      "INSERT INTO Giveaway (car, description, giveaway_date, creation_date, tickets, ticket_price) VALUES(?, ?, ?, ?, ?, ?)",
-      [car, description, date, creation_date, tickets, ticketPrice]
+      "INSERT INTO Giveaway (car, description, giveaway_date, creation_date, tickets, ticket_price, status) VALUES(?, ?, ?, ?, ?, ?)",
+      [car, description, date, creation_date, tickets, ticketPrice, 1] //1 disponible, 0 no disponible
     );
     
     const id = rows.insertId;
