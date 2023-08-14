@@ -15,7 +15,7 @@ export const createGiveaway = async (req, res) => {
 
   try {
     const [rows] = await pool.query(
-      "INSERT INTO giveaway (car, description, giveaway_date, creation_date, tickets, ticket_price) VALUES(?, ?, ?, ?, ?, ?)",
+      "INSERT INTO Giveaway (car, description, giveaway_date, creation_date, tickets, ticket_price) VALUES(?, ?, ?, ?, ?, ?)",
       [car, description, date, creation_date, tickets, ticketPrice]
     );
     
@@ -25,7 +25,7 @@ export const createGiveaway = async (req, res) => {
     for(let i = 0; i < req.files.length; i++){
       let image_name = req.files[i].filename;
       const [rows] = await pool.query(
-        "INSERT INTO giveaway_images (image_name, giveaway_id) VALUES(?, ?)",
+        "INSERT INTO Giveaway_images (image_name, giveaway_id) VALUES(?, ?)",
         [image_name, id]
       );
     }
@@ -49,7 +49,7 @@ export const getTicketsByGiveawayId = async (req, res = response) => {
   const limit = (parseInt(offset) + 1) * 500;
 
   try {
-      const [result] = await pool.query("SELECT * FROM ticket WHERE giveaway_id = ? AND ticket_number >= ? AND ticket_number <= ? ORDER BY ticket_number ASC LIMIT 500", [giveawayId, start, limit]);
+      const [result] = await pool.query("SELECT * FROM Ticket WHERE giveaway_id = ? AND ticket_number >= ? AND ticket_number <= ? ORDER BY ticket_number ASC LIMIT 500", [giveawayId, start, limit]);
       return res.send(result);
   } catch (error) {
       console.log(error);
@@ -61,7 +61,7 @@ export const getTicketsByGiveawayId = async (req, res = response) => {
 
 export const getGiveaways = async (req, res) => {
   try {
-      const [result] = await pool.query("SELECT * FROM giveaway WHERE status = ?", [req.params.status]);
+      const [result] = await pool.query("SELECT * FROM Giveaway WHERE status = ?", [req.params.status]);
       return res.send(result);
   } catch (error) {
       console.log(error)
@@ -73,7 +73,7 @@ export const getGiveaways = async (req, res) => {
 
 export const getGiveawayById = async (req, res) => {
     try {
-      const [result] = await pool.query("SELECT * FROM giveaway WHERE id = ?", [req.params.id]);
+      const [result] = await pool.query("SELECT * FROM Giveaway WHERE id = ?", [req.params.id]);
       let [giveaway] = result;
 
       return res.send(giveaway);
@@ -87,7 +87,7 @@ export const getGiveawayById = async (req, res) => {
 
 export const getGiveawayImages = async (req, res) => {
   try {
-    const [result] = await pool.query("SELECT image_name FROM giveaway_images WHERE giveaway_id = ? ORDER BY id", [
+    const [result] = await pool.query("SELECT image_name FROM Giveaway_images WHERE giveaway_id = ? ORDER BY id", [
       req.params.id,
     ]);
 
@@ -109,25 +109,25 @@ export const updateGiveaway = async (req, res) => {
 
   try {
     const [rows] = await pool.query(
-      "UPDATE giveaway SET car = ?, description = ?, giveaway_date = ?, ticket_price = ? WHERE id = ?",
+      "UPDATE Giveaway SET car = ?, description = ?, giveaway_date = ?, ticket_price = ? WHERE id = ?",
       [car, description, date, ticketPrice, id]
     );
 
     //Seleccionar imagenes de la bdd para eliminarlas del servidor
-    const [images] = await pool.query("SELECT image_name FROM giveaway_images WHERE giveaway_id = ?", [id]);
+    const [images] = await pool.query("SELECT image_name FROM Giveaway_images WHERE giveaway_id = ?", [id]);
     for (let i = 0; i < images.length; i++) {
       //Eliminar imagenes del servidor
       fs.unlinkSync(path.join(__dirname, `../public/uploads/${images[i].image_name}`));
     }
 
     //Eliminar otras imagenes base de datos
-    const resp = await pool.query("DELETE FROM giveaway_images WHERE giveaway_id = ?", [id]);
+    const resp = await pool.query("DELETE FROM Giveaway_images WHERE giveaway_id = ?", [id]);
     
     //Insertar imagenes
     for (let i = 0; i < req.files.length; i++) {
       let image_name = req.files[i].filename;
       const [rows] = await pool.query(
-        "INSERT INTO giveaway_images (image_name, giveaway_id) VALUES(?, ?)",
+        "INSERT INTO Giveaway_images (image_name, giveaway_id) VALUES(?, ?)",
         [image_name, id]
       );
     }
@@ -150,7 +150,7 @@ export const getTicketByNumber = async (req = request, res = response) => {
   const { giveawayId, ticketNumber } = req.params;
 
   try {
-    const [rows] = await pool.query("SELECT ticket_number FROM ticket WHERE ticket_number = ? AND giveaway_id = ?", [ticketNumber, giveawayId]);
+    const [rows] = await pool.query("SELECT ticket_number FROM Ticket WHERE ticket_number = ? AND giveaway_id = ?", [ticketNumber, giveawayId]);
     console.log(rows);
 
     if(rows.length > 0)

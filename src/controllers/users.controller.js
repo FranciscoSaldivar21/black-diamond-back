@@ -5,7 +5,7 @@ import nodemailer from "nodemailer";
 
 export const getUsers = async (req, res) => {
   try {
-    const [result] = await pool.query("SELECT * FROM user");
+    const [result] = await pool.query("SELECT * FROM User");
     return res.send(result);
   } catch (error) {
     return res.status(500).json({
@@ -24,7 +24,7 @@ export const createUser = async (req, res) => {
 
   try {
     const [rows] = await pool.query(
-      "INSERT INTO user (user_name, user_email, password, register_date, user_status, user_phone, adress) VALUES(?, ?, ?, ?, ?, ?, ?)",
+      "INSERT INTO User (user_name, user_email, password, register_date, user_status, user_phone, adress) VALUES(?, ?, ?, ?, ?, ?, ?)",
       [name, email, password, date, "1", phone, adress]
     );
     const token = await createJWT(rows.insertId);
@@ -50,7 +50,7 @@ export const logIn = async (req, res) => {
   const { email, password } = req.body;
 
   var [fromDB] = await pool.query(
-    "SELECT * from user WHERE user_email  = ? Limit 1",
+    "SELECT * from User WHERE user_email  = ? Limit 1",
     [email]
   );
 
@@ -74,7 +74,7 @@ export const logIn = async (req, res) => {
 
 export const getUserById = async (req, res) => {
   const [rows] = await pool.query(
-    "SELECT * FROM user WHERE user_id = ? LIMIT 1",
+    "SELECT * FROM User WHERE user_id = ? LIMIT 1",
     [req.params.id]
   );
 
@@ -87,7 +87,7 @@ export const getUserById = async (req, res) => {
 };
 
 export const deleteUser = async (req, res) => {
-  const [response] = await pool.query("DELETE FROM user WHERE id_user = ?", [
+  const [response] = await pool.query("DELETE FROM User WHERE id_user = ?", [
     req.params.id,
   ]);
   const { affectedRows } = response;
@@ -108,7 +108,7 @@ export const updateUser = async (req, res) => {
   try {
     const [response] = await pool.query(
       //Si no se recibe un dato coloca el que está por defecto
-      "UPDATE user SET user_email = ?, user_name = ?, user_phone = ?, adress = ? WHERE user_id = ?",
+      "UPDATE User SET user_email = ?, user_name = ?, user_phone = ?, adress = ? WHERE user_id = ?",
       [email, name, phone, adress, id]
     );
     const { affectedRows } = response;
@@ -128,7 +128,7 @@ export const forgotMyPassword = async (req, res) => {
   const { email } = req.params;
 
   var [fromDB] = await pool.query(
-    "SELECT user_email, password from user WHERE user_email  = ? Limit 1",
+    "SELECT user_email, password from User WHERE user_email  = ? Limit 1",
     [email]
   );
 
