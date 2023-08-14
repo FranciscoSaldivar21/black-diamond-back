@@ -3,9 +3,9 @@ import { config } from "dotenv";
 config();
 
 export const SERVER_PORT = process.env.PORT;
-export const HOST = process.env.HOST;
-export const USER = process.env.USER;
-export const PASSWORD = process.env.PASSWORD;
-export const DB_PORT = process.env.DB_PORT;
-export const DATABASE = process.env.DATABASE;
+export const HOST = process.env.MYSQLHOST;
+export const USER = process.env.MYSQLUSER;
+export const PASSWORD = process.env.MYSQLPASSWORD;
+export const DB_PORT = process.env.MYSQLPORT;
+export const DATABASE = process.env.MYSQLDATABASE;
 export const JWT_SECRET = process.env.JWT_SECRET;
