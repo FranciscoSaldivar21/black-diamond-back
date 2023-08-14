@@ -12,6 +12,7 @@ export const createGiveaway = async (req, res) => {
 
   const car = `${brand} ${model} ${year}`;
   const creation_date = new Date().toLocaleDateString();
+  console.log(creation_date);
 
   try {
     const [rows] = await pool.query(
