@@ -66,7 +66,7 @@ app.use('/api/users', usersRoutes);
 app.use("/api/giveaway", giveaways);
 app.use("/api/admin", admin);
 app.use("/api/sales", sales);
-app.use("/api/webhook", payment);
+app.use("/api/validatePayment", payment);
 app.use("/api/contact", contact)
 
 
