@@ -25,7 +25,7 @@ export const createUser = async (req, res) => {
   try {
     const [rows] = await pool.query(
       "INSERT INTO User (user_name, user_email, password, register_date, user_status, user_phone, adress) VALUES(?, ?, ?, ?, ?, ?, ?)",
-      [name, email, password, date, "1", phone, adress]
+      [name, email, password, date, 1, phone, adress]
     );
     const token = await createJWT(rows.insertId);
     return res.status(201).send({

@@ -35,6 +35,7 @@ export const createGiveaway = async (req, res) => {
     });
 
   } catch (error) {
+    console.log(error);
     if (error) {
       return res.status(500).json({
         error: "Something happend",
