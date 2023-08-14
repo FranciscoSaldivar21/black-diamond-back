@@ -20,7 +20,7 @@ import bodyParser from "body-parser";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const PORT = SERVER_PORT || 3000;
+const PORT = PORT || 3000;
 
 const storage = multer.diskStorage({
     destination: path.join(__dirname, 'public/uploads'),
