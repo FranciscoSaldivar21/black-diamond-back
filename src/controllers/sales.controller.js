@@ -21,11 +21,13 @@ export const insertSale = async (req = request, res = response) => {
       }
     }
 
-    const date = new Date().toLocaleDateString();
+    let creation_date = new Date().toLocaleDateString();
+    const aux = creation_date.split("/");
+    creation_date = `${aux[1]}/${aux[0]}/${aux[2]}`;
     //Insertar código para meter boletos a la base de datos pero dejarlos como pendientes, en caso de que la compra no se haga eliminar los registros en el payment
     const [response] = await pool.query(
       "INSERT INTO Sales VALUES(0, ?, ?, ?, ?, 0)", //cero para dejar la compra en estatus pendiente y el null es porque aun no hay id de compra
-      [userId, date, giveawayId, giveawayBenefic]
+      [userId, creation_date, giveawayId, giveawayBenefic]
     );
 
     //Extraemos el id de compra insertado
