@@ -13,19 +13,19 @@ router.post(
     try {
       //Actualizar datos en tabla sales
       const resp = await pool.query(
-        "UPDATE sales SET status = 1 WHERE id = ?", [saleId]
+        "UPDATE Sales SET status = 1 WHERE id = ?", [saleId]
       );
 
       const [res] = await pool.query(
-        "SELECT * FROM sales INNER JOIN user ON user_id = id_user WHERE id = ?",
+        "SELECT * FROM Sales INNER JOIN User ON user_id = id_user WHERE id = ?",
         [saleId]
       );
       
       const [saleData] = res;
       
-      const [boughtTickets] = await pool.query("SELECT ticket_number FROM ticket WHERE sale_id = ? AND STATUS = 1", [saleId]);
+      const [boughtTickets] = await pool.query("SELECT ticket_number FROM Ticket WHERE sale_id = ? AND status = 1", [saleId]);
 
-      const [giftTickets] = await pool.query("SELECT ticket_number FROM ticket WHERE sale_id = ? AND STATUS = 2", [saleId]);
+      const [giftTickets] = await pool.query("SELECT ticket_number FROM Ticket WHERE sale_id = ? AND status = 2", [saleId]);
   
       //Send email terminar
       let typeBenefic;
@@ -128,16 +128,16 @@ router.get(
     const { giveawayId, saleId } = request.params;
 
     try {
-      const result = await pool.query("DELETE FROM ticket WHERE sale_id = ?", [
+      const result = await pool.query("DELETE FROM Ticket WHERE sale_id = ?", [
         saleId,
       ]);
 
-      const res = await pool.query("DELETE FROM sales WHERE id = ?", [saleId]);
+      const res = await pool.query("DELETE FROM Sales WHERE id = ?", [saleId]);
     } catch (error) {
       console.log(error);
     }
 
-    return response.redirect(`http://localhost:5173/giveaway/${giveawayId}`);
+    return response.sendStatus(200);
   }
 );
 

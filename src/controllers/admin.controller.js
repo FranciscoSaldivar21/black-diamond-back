@@ -5,7 +5,7 @@ export const logIn = async (req, res) => {
   const { email, password } = req.body;
 
   var [fromDB] = await pool.query(
-    "SELECT * from admin WHERE email  = ?  AND password = ? Limit 1",
+    "SELECT * from Admin WHERE email  = ?  AND password = ? Limit 1",
     [email, password]
   );
 

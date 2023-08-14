@@ -9,7 +9,7 @@ export const insertSale = async (req = request, res = response) => {
     //Evitar que se vendan boletos dos veces
     for (let i = 0; i < tickets.length; i++) {
       const [rows] = await pool.query(
-        "SELECT ticket_number FROM ticket WHERE giveaway_id = ? AND ticket_number = ?",
+        "SELECT ticket_number FROM Ticket WHERE giveaway_id = ? AND ticket_number = ?",
         [giveawayId, tickets[i]]
       );
       if (rows.length > 0) {
@@ -24,7 +24,7 @@ export const insertSale = async (req = request, res = response) => {
     const date = new Date().toLocaleDateString();
     //Insertar código para meter boletos a la base de datos pero dejarlos como pendientes, en caso de que la compra no se haga eliminar los registros en el payment
     const [response] = await pool.query(
-      "INSERT INTO sales VALUES(0, ?, ?, ?, ?, 0, null)", //cero para dejar la compra en estatus pendiente y el null es porque aun no hay id de compra
+      "INSERT INTO Sales VALUES(0, ?, ?, ?, ?, 0, null)", //cero para dejar la compra en estatus pendiente y el null es porque aun no hay id de compra
       [userId, date, giveawayId, giveawayBenefic]
     );
 
@@ -34,7 +34,7 @@ export const insertSale = async (req = request, res = response) => {
     //Insertar en base de datos los boletos comprados, en caso de cancelarse la compra se eliminan los registros en el payment
     for (let i = 0; i < tickets.length; i++) {
       const resp = await pool.query(
-        "INSERT INTO ticket VALUES (0, ?, ?, ?, ?, ?, 1)",
+        "INSERT INTO Ticket VALUES (0, ?, ?, ?, ?, ?, 1)",
         [giveawayId, tickets[i], userId, ticketPrice, insertId] //1 comprado, 2 regalado. Es para apartar los boletos
       );
     }
@@ -52,7 +52,7 @@ export const insertSale = async (req = request, res = response) => {
     while (giftTickets.length < limit) {
       const number = Math.floor(Math.random() * (99999 - 33333)) + 33333;
       const [rows] = await pool.query(
-        "SELECT ticket_number FROM ticket WHERE ticket_number = ?",
+        "SELECT ticket_number FROM Ticket WHERE ticket_number = ?",
         [number]
       );
       
@@ -63,7 +63,7 @@ export const insertSale = async (req = request, res = response) => {
 
     for (let i = 0; i < giftTickets.length; i++) {
       const giftTicketsInsertion = await pool.query(
-        "INSERT INTO ticket VALUES (0, ?, ?, ?, ?, ?, 2)",
+        "INSERT INTO Ticket VALUES (0, ?, ?, ?, ?, ?, 2)",
         [giveawayId, giftTickets[i], userId, ticketPrice, insertId] //1 comprado, 2 regalado.
       );
     }
@@ -83,12 +83,12 @@ export const insertSale = async (req = request, res = response) => {
 export const getSaleById = async (req = request, res = response) => {
   const { id } = req.params;
   const [rows] = await pool.query(
-    "SELECT sales.status AS saleStatus, sales.id, sales.benefic, sales.id_user, sales.sale_date, sales.giveaway_id, giveaway.car, giveaway. description, giveaway.giveaway_date, giveaway.creation_date, giveaway.status FROM sales INNER JOIN giveaway ON giveaway_id = giveaway.id WHERE sales.id = ?",
+    "SELECT Sales.status AS saleStatus, Sales.id, Sales.benefic, Sales.id_user, Sales.sale_date, Sales.giveaway_id, Giveaway.car, Giveaway. description, Giveaway.giveaway_date, Giveaway.creation_date, Giveaway.status FROM Sales INNER JOIN Giveaway ON giveaway_id = Giveaway.id WHERE Sales.id = ?",
     [id]
   );
 
   if (rows.length > 0) {
-    const [data] = await pool.query("SELECT * FROM ticket WHERE sale_id = ?", [
+    const [data] = await pool.query("SELECT * FROM Ticket WHERE sale_id = ?", [
       id,
     ]);
 
@@ -108,7 +108,7 @@ export const getSales = async (req = request, res = response) => {
 
   try {
     const [rows] = await pool.query(
-      "SELECT sales.id, sales.status AS saleStatus, sales.id_user, sales.sale_date, sales.giveaway_id, giveaway.car, giveaway.description, giveaway.giveaway_date, giveaway.status FROM sales INNER JOIN giveaway ON giveaway_id = giveaway.id WHERE sales.id_user = ? ORDER BY sales.id DESC",
+      "SELECT Sales.id, Sales.status AS saleStatus, Sales.id_user, Sales.sale_date, Sales.giveaway_id, Giveaway.car, Giveaway.description, Giveaway.giveaway_date, Giveaway.status FROM Sales INNER JOIN Giveaway ON giveaway_id = Giveaway.id WHERE Sales.id_user = ? ORDER BY Sales.id DESC",
       [userId]
     );
 
