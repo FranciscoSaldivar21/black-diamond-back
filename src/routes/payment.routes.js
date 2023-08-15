@@ -44,7 +44,7 @@ router.post(
         auth: {
           user: "blackdiamondsorteos@gmail.com",
           pass: "kycjnlqvzifzmgey",
-        },
+        }, 
       };
   
       const message = {
