@@ -20,10 +20,7 @@ router.post(
         "SELECT * FROM Sales INNER JOIN User ON user_id = id_user WHERE id = ?",
         [saleId]
       );
-      
-      const [saleData] = res;
-      console.log(saleData);
-      return;
+    
       
       const [boughtTickets] = await pool.query("SELECT ticket_number FROM Ticket WHERE sale_id = ? AND status = 1", [saleId]);
 
