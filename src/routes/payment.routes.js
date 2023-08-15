@@ -20,10 +20,9 @@ router.post(
         "SELECT * FROM Sales INNER JOIN User ON user_id = id_user WHERE id = ?",
         [saleId]
       );
-    
       
+      const saleData = res[0];
       const [boughtTickets] = await pool.query("SELECT ticket_number FROM Ticket WHERE sale_id = ? AND status = 1", [saleId]);
-
       const [giftTickets] = await pool.query("SELECT ticket_number FROM Ticket WHERE sale_id = ? AND status = 2", [saleId]);
   
       //Send email terminar
