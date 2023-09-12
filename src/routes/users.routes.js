@@ -15,8 +15,8 @@ import { validateJWT } from "../middlewares/validateJWT.js";
 const router = Router();
 
 router.get("/forgotPassword/:email", forgotMyPassword);
-router.get("/", validateJWT, getUsers);
-router.get("/:id", validateJWT, getUserById);
+router.get("/:page", validateJWT, getUsers);
+router.get("/user/:id", getUserById);
 
 router.post("/register", 
 //Middlewares

@@ -44,11 +44,11 @@ export const insertSale = async (req = request, res = response) => {
     //Extraer tickets de regalo
     let limit = 0;
     let giftTickets = [];
-    if (tickets.length > 1){
-          if (tickets.length > 2 && tickets.length < 5) limit = 7;
-          if (tickets.length >= 5 && tickets.length < 8) limit = 15;
-          if (tickets.length >= 8 && tickets.length < 10) limit = 22;
-          if (tickets.length >= 10) limit = 30;
+    if (tickets.length > 1) {
+      if (tickets.length > 2 && tickets.length < 5) limit = 7;
+      if (tickets.length >= 5 && tickets.length < 8) limit = 15;
+      if (tickets.length >= 8 && tickets.length < 10) limit = 22;
+      if (tickets.length >= 10) limit = 30;
     }
 
     while (giftTickets.length < limit) {
@@ -57,7 +57,7 @@ export const insertSale = async (req = request, res = response) => {
         "SELECT ticket_number FROM Ticket WHERE ticket_number = ?",
         [number]
       );
-      
+
       if (rows.length > 0) continue;
 
       giftTickets.push(number);
@@ -72,7 +72,7 @@ export const insertSale = async (req = request, res = response) => {
 
     return res.json({
       ok: true,
-      saleId : insertId
+      saleId: insertId,
     });
   } catch (error) {
     console.log(error);
@@ -84,6 +84,7 @@ export const insertSale = async (req = request, res = response) => {
 
 export const getSaleById = async (req = request, res = response) => {
   const { id } = req.params;
+
   const [rows] = await pool.query(
     "SELECT Sales.status AS saleStatus, Sales.id, Sales.benefic, Sales.id_user, Sales.sale_date, Sales.giveaway_id, Giveaway.car, Giveaway. description, Giveaway.giveaway_date, Giveaway.creation_date, Giveaway.status FROM Sales INNER JOIN Giveaway ON giveaway_id = Giveaway.id WHERE Sales.id = ?",
     [id]
@@ -119,9 +120,45 @@ export const getSales = async (req = request, res = response) => {
     });
   } catch (error) {
     console.log(error);
-    res.status(400).json({
+    res.sendStatus(400).json({
       error,
       msg: "Something was wrong",
     });
   }
 };
+
+export const getAllSales = async (req = request, res = response) => {
+  const { page } = req.params;
+  console.log(page);
+  const offset = 20;
+  const from = parseInt(page) * parseInt(offset);
+
+  try {
+    const [rows] = await pool.query(
+      "SELECT COUNT(*) AS totalTickets, s.id, s.id_user, s.sale_date, s.status, u.user_email, u.user_name, u.user_phone, g.ticket_price FROM Ticket AS t INNER JOIN Sales AS s INNER JOIN User AS u ON u.user_id = s.id_user INNER JOIN Giveaway as g ON g.id = s.giveaway_id WHERE s.id = t.sale_id AND t.status = 1 GROUP BY t.sale_id LIMIT ? OFFSET ?",
+      [offset, from]
+    );
+
+    return res.status(200).json(rows);
+  } catch (error) {
+    console.log(error);
+    return res.send(400).json(error);
+  }
+};
+
+
+export const getBuyerByTicket = async (req = request, res = response) => {
+  const { ticket, giveaway_id } = req.params;
+  
+  try {
+    const [ rows ] = await pool.query(
+      "SELECT s.id, s.sale_date, s.benefic, s.status, u.user_name, u.adress, u.user_email, u.user_phone, u.register_date FROM Ticket AS t INNER JOIN User AS u ON t.user_id = u.user_id INNER JOIN Sales AS s ON t.sale_id = s.id WHERE t.giveaway_id = ? AND t.ticket_number = ?",
+      [giveaway_id, ticket]
+    );
+
+    return res.status(200).json(rows);
+  } catch (error) {
+    console.log(error);
+    return res.status(400);
+  }
+}
