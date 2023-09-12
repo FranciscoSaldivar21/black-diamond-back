@@ -2,12 +2,19 @@ import { pool } from "../database/db.js";
 import bcrypt from "bcryptjs";
 import { createJWT } from "../helpers/jwt.js";
 import nodemailer from "nodemailer";
+import { request, response } from "express";
 
-export const getUsers = async (req, res) => {
+export const getUsers = async (req = request, res = response) => {
+  const { page } = req.params;
+  const offset = 15;
+  const from = parseInt(page) * parseInt(offset);
+
   try {
-    const [result] = await pool.query("SELECT * FROM User");
+    const [result] = await pool.query("SELECT * FROM User LIMIT ? OFFSET ?", [offset, from]);
+    console.log(result);
     return res.send(result);
   } catch (error) {
+    console.log(error);
     return res.status(500).json({
       error: "Unexpected error",
     });
@@ -74,6 +81,7 @@ export const logIn = async (req, res) => {
 }
 
 export const getUserById = async (req, res) => {
+  console.log("Aquí")
   const [rows] = await pool.query(
     "SELECT * FROM User WHERE user_id = ? LIMIT 1",
     [req.params.id]

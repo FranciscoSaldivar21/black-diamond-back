@@ -2,6 +2,7 @@ import express, { Router, json, request, response } from "express";
 import nodemailer from "nodemailer";
 import { body } from "express-validator";
 import { pool } from "../database/db.js";
+import { validateJWT } from "../middlewares/validateJWT.js";
 
 const router = Router();
 
@@ -117,13 +118,10 @@ router.post(
   }
 );
 
-router.get(
-  "/cancel/:giveawayId/:saleId",
-  express.raw({ type: "application/json" }),
-  async (request = request, response = response) => {
+router.post(
+  "/cancel/:saleId", async (request = request, response = response) => {
     //Eliminar datos de la compra
-    console.log("Se canceló la compra");
-    const { giveawayId, saleId } = request.params;
+    const { saleId } = request.params;
 
     try {
       const result = await pool.query("DELETE FROM Ticket WHERE sale_id = ?", [
@@ -131,11 +129,31 @@ router.get(
       ]);
 
       const res = await pool.query("DELETE FROM Sales WHERE id = ?", [saleId]);
+      return response.sendStatus(200);
     } catch (error) {
       console.log(error);
+      return response.sendStatus(400);
     }
 
-    return response.sendStatus(200);
+  }
+);
+
+router.post(
+  "/invalidate/:saleId", async (request = request, response = response) => {
+    //Eliminar datos de la compra
+    const { saleId } = request.params;
+
+    try {
+      const result = await pool.query("UPDATE Sales SET status = 0 WHERE id = ?", [
+        saleId,
+      ]);
+
+      return response.sendStatus(200);
+    } catch (error) {
+      console.log(error);
+      return response.sendStatus(400);
+    }
+
   }
 );
 
