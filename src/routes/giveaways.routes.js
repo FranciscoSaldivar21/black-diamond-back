@@ -16,7 +16,7 @@ router.get("/ticket/:giveawayId/:ticketNumber", getTicketByNumber);
 router.get("/progress", getGiveawayProgress);
 router.get("/getTicketsStartWith/:giveawayId/:startsWith", getTicketsStartWith);
 router.get("/getTicketsEndtWith/:giveawayId/:endWith", getTicketsEndtWith);
-router.get("/getTicketsContain/:giveawayId/:endWith", getTicketsContain);
+router.get("/getTicketsContain/:giveawayId/:contain", getTicketsContain);
 router.get("/getTicketFree/:giveawayId", getTicketFree);
 router.get("/initializeTickets/:giveawayId", initializeTickets);
 router.get("/isTicketFree/:ticket/:giveawayId", isTicketFree);

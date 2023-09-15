@@ -220,6 +220,11 @@ export const getTicketsStartWith = async (req = request, res = response) => {
         attemps++;
         continue;
       } else {
+				if(array.includes(numberToAdd)){
+					attemps++;
+					continue;
+				}
+
         array.push(parseInt(numberToAdd));
       }
     } catch (error) {
@@ -251,7 +256,8 @@ export const initializeTickets = async (req = request, res = response) => {
         attemps++;
         continue;
       } else {
-        aux.push(parseInt(number));
+				if(!aux.includes(number))
+        	aux.push(parseInt(number));
         i++;
       }
     } catch (error) {
@@ -311,7 +317,8 @@ export const getTicketsEndtWith = async (req = request, res = response) => {
         attemps++;
         continue;
       } else {
-        array.push(parseInt(numberToAdd));
+				if(!array.includes(numberToAdd))
+        	array.push(parseInt(numberToAdd));
       }
     } catch (error) {
       console.log(error);
@@ -327,25 +334,66 @@ export const getTicketsEndtWith = async (req = request, res = response) => {
 };
 
 export const getTicketsContain = async (req = request, res = response) => {
-  console.log("Aquí");
-  return res.status(200).json({ hola: "Hola" });
+  const { giveawayId, contain } = req.params;
+  const long = 5 - contain.length;
+  const numbers = "01203405670089";
+  let attemps = 0;
+  let array = [];
+  let counter = 0;
+
+  while (counter < 42) {
+    if (attemps > 20) break;
+    let finalNumber = contain.split("");
+    while (finalNumber.length < 5) {
+      let randomNumber = numbers.charAt(
+        Math.floor(Math.random() * numbers.length)
+      );
+      let beetween1and0 = Math.round(Math.random() * (1 - 0) + 0);
+
+      //Inserta al final
+      if (beetween1and0 === 1) finalNumber.push(randomNumber);
+      else if (beetween1and0 === 0) finalNumber.unshift(randomNumber);
+    }
+    const numberToAdd = parseInt(finalNumber.toString().replace(/,/g, ""));
+
+    if (numberToAdd > 33333) continue;
+
+    try {
+			const [rows] = await pool.query("SELECT ticket_number FROM Ticket WHERE ticket_number = ? AND giveaway_id = ?", [numberToAdd, giveawayId]);
+			if(rows.length > 0){
+				attemps++;
+				continue;
+			}else{
+				if(!array.includes(numberToAdd))
+					array.push(parseInt(finalNumber.toString().replace(/,/g, "")));
+
+				counter++;
+			}
+    } catch (error) {
+			console.log(error);
+		}
+  }
+  return res.status(200).json({ array });
 };
 
 export const getTicketFree = async (req = request, res = response) => {
   const { giveawayId } = req.params;
-	let band = false;
-	let number = 0;
-	while(!band){
-		number = Math.floor(Math.random() * (33333 - 1 + 1) + 1);
-		try {
-			const [rows] = await pool.query("SELECT ticket_number FROM Ticket WHERE ticket_number = ? AND giveaway_id = ?", [number, giveawayId]);
-			if(rows.length === 0){
-				band = true;
-			}
-		} catch (error) {
-			console.log(error);
-			return res.sendStatus(400);
-		}
-	}
+  let band = false;
+  let number = 0;
+  while (!band) {
+    number = Math.floor(Math.random() * (33333 - 1 + 1) + 1);
+    try {
+      const [rows] = await pool.query(
+        "SELECT ticket_number FROM Ticket WHERE ticket_number = ? AND giveaway_id = ?",
+        [number, giveawayId]
+      );
+      if (rows.length === 0) {
+        band = true;
+      }
+    } catch (error) {
+      console.log(error);
+      return res.sendStatus(400);
+    }
+  }
   return res.status(200).json({ number });
 };
